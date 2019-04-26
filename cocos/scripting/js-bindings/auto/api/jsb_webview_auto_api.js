@@ -19,6 +19,16 @@ func
 },
 
 /**
+ * @method getUserAgent
+ * @return {String}
+ */
+getUserAgent : function (
+)
+{
+    return ;
+},
+
+/**
  * @method setOnDidFailLoading
  * @param {function} arg0
  */
@@ -91,6 +101,16 @@ getOnDidFailLoading : function (
  * @param {String} arg0
  */
 loadFile : function (
+str 
+)
+{
+},
+
+/**
+ * @method setUserAgent
+ * @param {String} arg0
+ */
+setUserAgent : function (
 str 
 )
 {

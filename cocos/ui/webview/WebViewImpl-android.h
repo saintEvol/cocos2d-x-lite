@@ -59,6 +59,9 @@ NS_CC_BEGIN
 
         bool canGoBack();
 
+        std::string getUserAgent(); 
+        void setUserAgent(const std::string& agentStr);
+
         bool canGoForward();
 
         void goBack();

@@ -70,6 +70,14 @@ NS_CC_BEGIN
         _impl->loadData(data, MIMEType, encoding, baseURL);
     }
 
+    std::string WebView::getUserAgent() {
+        return _impl->getUserAgent();
+    }
+
+    void WebView::setUserAgent(const std::string& agentStr){
+        _impl -> setUserAgent(agentStr);
+    }
+
     void WebView::loadHTMLString(const std::string &string, const std::string &baseURL) {
         _impl->loadHTMLString(string, baseURL);
     }

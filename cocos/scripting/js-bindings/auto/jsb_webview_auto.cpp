@@ -60,6 +60,24 @@ static bool js_webview_WebView_setOnShouldStartLoading(se::State& s)
 }
 SE_BIND_FUNC(js_webview_WebView_setOnShouldStartLoading)
 
+static bool js_webview_WebView_getUserAgent(se::State& s)
+{
+    cocos2d::WebView* cobj = (cocos2d::WebView*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_webview_WebView_getUserAgent : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 0) {
+        std::string result = cobj->getUserAgent();
+        ok &= std_string_to_seval(result, &s.rval());
+        SE_PRECONDITION2(ok, false, "js_webview_WebView_getUserAgent : Error processing arguments");
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 0);
+    return false;
+}
+SE_BIND_FUNC(js_webview_WebView_getUserAgent)
+
 static bool js_webview_WebView_setOnDidFailLoading(se::State& s)
 {
     cocos2d::WebView* cobj = (cocos2d::WebView*)s.nativeThisObject();
@@ -240,6 +258,25 @@ static bool js_webview_WebView_loadFile(se::State& s)
     return false;
 }
 SE_BIND_FUNC(js_webview_WebView_loadFile)
+
+static bool js_webview_WebView_setUserAgent(se::State& s)
+{
+    cocos2d::WebView* cobj = (cocos2d::WebView*)s.nativeThisObject();
+    SE_PRECONDITION2(cobj, false, "js_webview_WebView_setUserAgent : Invalid Native Object");
+    const auto& args = s.args();
+    size_t argc = args.size();
+    CC_UNUSED bool ok = true;
+    if (argc == 1) {
+        std::string arg0;
+        ok &= seval_to_std_string(args[0], &arg0);
+        SE_PRECONDITION2(ok, false, "js_webview_WebView_setUserAgent : Error processing arguments");
+        cobj->setUserAgent(arg0);
+        return true;
+    }
+    SE_REPORT_ERROR("wrong number of arguments: %d, was expecting %d", (int)argc, 1);
+    return false;
+}
+SE_BIND_FUNC(js_webview_WebView_setUserAgent)
 
 static bool js_webview_WebView_loadURL(se::State& s)
 {
@@ -631,6 +668,7 @@ bool js_register_webview_WebView(se::Object* obj)
     auto cls = se::Class::create("WebView", obj, nullptr, _SE(js_webview_WebView_constructor));
 
     cls->defineFunction("setOnShouldStartLoading", _SE(js_webview_WebView_setOnShouldStartLoading));
+    cls->defineFunction("getUserAgent", _SE(js_webview_WebView_getUserAgent));
     cls->defineFunction("setOnDidFailLoading", _SE(js_webview_WebView_setOnDidFailLoading));
     cls->defineFunction("canGoBack", _SE(js_webview_WebView_canGoBack));
     cls->defineFunction("loadHTMLString", _SE(js_webview_WebView_loadHTMLString));
@@ -639,6 +677,7 @@ bool js_register_webview_WebView(se::Object* obj)
     cls->defineFunction("setScalesPageToFit", _SE(js_webview_WebView_setScalesPageToFit));
     cls->defineFunction("getOnDidFailLoading", _SE(js_webview_WebView_getOnDidFailLoading));
     cls->defineFunction("loadFile", _SE(js_webview_WebView_loadFile));
+    cls->defineFunction("setUserAgent", _SE(js_webview_WebView_setUserAgent));
     cls->defineFunction("loadURL", _SE(js_webview_WebView_loadURL));
     cls->defineFunction("setBounces", _SE(js_webview_WebView_setBounces));
     cls->defineFunction("evaluateJS", _SE(js_webview_WebView_evaluateJS));
