@@ -108,6 +108,28 @@ public class Cocos2dxWebViewHelper {
         });
     }
 
+    public  static void onPauseWebView() {
+        for(int i=0; i<webViews.size(); i++) {
+            int key = webViews.keyAt(i);
+            Cocos2dxWebView myWeb = webViews.get(key);
+            System.out.println("onPauseWebView");
+            System.out.println(myWeb);
+            myWeb.onPause();
+            myWeb.pauseTimers();
+        }
+    }
+
+    public  static void onResumeWebView() {
+        for(int i=0; i<webViews.size(); i++) {
+            int key = webViews.keyAt(i);
+            Cocos2dxWebView myWeb = webViews.get(key);
+            System.out.println("onResumeWebView");
+            System.out.println(myWeb);
+            myWeb.onResume();
+            myWeb.resumeTimers();
+        }
+    }
+
     // public static boolean canGoBack(final int index) {
     // Callable<Boolean> callable = new Callable<Boolean>() {
     // @Override
