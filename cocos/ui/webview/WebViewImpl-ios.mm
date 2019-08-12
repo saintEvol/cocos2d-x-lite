@@ -95,6 +95,8 @@ static std::string getFixedBaseUrl(const std::string& baseUrl)
 - (void)goForward;
 
 - (void)setScalesPageToFit:(const bool)scalesPageToFit;
+- (const std::string &) getUserAgent();
+- (void) setUserAgent(const std::string &ua);
 @end
 
 
@@ -161,6 +163,16 @@ static std::string getFixedBaseUrl(const std::string& baseUrl)
 - (void)setJavascriptInterfaceScheme:(const std::string &)scheme {
     self.jsScheme = @(scheme.c_str());
 }
+
+- (const std::string &)getUserAgent {
+    return [self.uiWebView stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
+}
+
+- (void)setUserAgent:(const std::string &)ua {
+    NSDictionary *dictionnary = [[NSDictionary alloc] initWithObjectsAndKeys:ua, @"UserAgent", nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:dictionnary];
+}
+
 
 - (void)loadData:(const std::string &)data MIMEType:(const std::string &)MIMEType textEncodingName:(const std::string &)encodingName baseURL:(const std::string &)baseURL {
     [self.uiWebView loadData:[NSData dataWithBytes:data.c_str() length:data.length()]

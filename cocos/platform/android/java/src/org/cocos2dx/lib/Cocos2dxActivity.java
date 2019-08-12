@@ -42,6 +42,7 @@ import android.util.Log;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -342,6 +343,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         super.onResume();
         Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
         Utils.hideVirtualButton();
+        Cocos2dxWebViewHelper.onResumeWebView();
        	resumeIfHasFocus();
     }
 
@@ -368,6 +370,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         super.onPause();
         Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
         Cocos2dxHelper.onPause();
+        Cocos2dxWebViewHelper.onPauseWebView();
         mGLSurfaceView.onPause();
     }
 

@@ -62,6 +62,10 @@ NS_CC_BEGIN
          */
         void setJavascriptInterfaceScheme(const std::string &scheme);
 
+        std::string getUserAgent();
+
+        void setUserAgent(const std::string& agetnStr);
+
         /**
          * Sets the main page contents, MIME type, content encoding, and base URL.
          *

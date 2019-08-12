@@ -36,7 +36,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-
 public class Cocos2dxWebViewHelper {
     private static final String TAG = Cocos2dxWebViewHelper.class.getSimpleName();
     private static Handler sHandler;
@@ -84,8 +83,7 @@ public class Cocos2dxWebViewHelper {
             @Override
             public void run() {
                 Cocos2dxWebView webView = new Cocos2dxWebView(sCocos2dxActivity, index);
-                FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
                         FrameLayout.LayoutParams.WRAP_CONTENT);
                 sLayout.addView(webView, lParams);
 
@@ -110,6 +108,97 @@ public class Cocos2dxWebViewHelper {
         });
     }
 
+    public  static void onPauseWebView() {
+        for(int i=0; i<webViews.size(); i++) {
+            int key = webViews.keyAt(i);
+            Cocos2dxWebView myWeb = webViews.get(key);
+            System.out.println("onPauseWebView");
+            System.out.println(myWeb);
+            myWeb.onPause();
+            myWeb.pauseTimers();
+        }
+    }
+
+    public  static void onResumeWebView() {
+        for(int i=0; i<webViews.size(); i++) {
+            int key = webViews.keyAt(i);
+            Cocos2dxWebView myWeb = webViews.get(key);
+            System.out.println("onResumeWebView");
+            System.out.println(myWeb);
+            myWeb.onResume();
+            myWeb.resumeTimers();
+        }
+    }
+
+    // public static boolean canGoBack(final int index) {
+    // Callable<Boolean> callable = new Callable<Boolean>() {
+    // @Override
+    // public Boolean call() throws Exception {
+    // Cocos2dxWebView webView = webViews.get(index);
+    // return webView != null && webView.canGoBack();
+    // }
+    // };
+    // try {
+    // return callInMainThread(callable);
+    // } catch (ExecutionException e) {
+    // return false;
+    // } catch (InterruptedException e) {
+    // return false;
+    // }
+    // }
+
+    // public static WebSettings getSettings(final int index) {
+    // Callable<WebSttings> callable = new Callable<WebSttings>() {
+    // @Override
+    // public WebSettings call() throws Exception {
+    // Cocos2dxWebView webView = webViews.get(index);
+    // if (webView == null)
+    // return null;
+    // return webView.getSettings();
+    // }
+    // };
+
+    // try {
+    // return callInMainThread(callable);
+    // } catch (ExecutionException e) {
+    // return null;
+    // } catch (InterruptedException e) {
+    // return null;
+    // }
+    // }
+
+    public static String getUserAgent(final int index) {
+        Callable<String> callable = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                Cocos2dxWebView webView = webViews.get(index);
+                if (webView == null)
+                    return null;
+                return webView.getSettings().getUserAgentString();
+            }
+        };
+
+        try {
+            return callInMainThread(callable);
+        } catch (ExecutionException e) {
+            return null;
+        } catch (InterruptedException e) {
+            return null;
+        }
+    }
+
+    public static void setUserAgent(final int index, final String agentStr) {
+        sCocos2dxActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Cocos2dxWebView webView = webViews.get(index);
+                if (webView != null) {
+                    webView.getSettings().setUserAgentString(agentStr);
+                }
+            }
+        });
+    }
+
     public static void setVisible(final int index, final boolean visible) {
         sCocos2dxActivity.runOnUiThread(new Runnable() {
             @Override
@@ -122,7 +211,8 @@ public class Cocos2dxWebViewHelper {
         });
     }
 
-    public static void setWebViewRect(final int index, final int left, final int top, final int maxWidth, final int maxHeight) {
+    public static void setWebViewRect(final int index, final int left, final int top, final int maxWidth,
+            final int maxHeight) {
         sCocos2dxActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -146,7 +236,8 @@ public class Cocos2dxWebViewHelper {
         });
     }
 
-    public static void loadData(final int index, final String data, final String mimeType, final String encoding, final String baseURL) {
+    public static void loadData(final int index, final String data, final String mimeType, final String encoding,
+            final String baseURL) {
         sCocos2dxActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {

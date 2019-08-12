@@ -84,7 +84,7 @@ public class Cocos2dxWebView extends WebView {
 
         // `searchBoxJavaBridge_` has big security risk. http://jvn.jp/en/jp/JVN53768697
         try {
-            Method method = this.getClass().getMethod("removeJavascriptInterface", new Class[]{String.class});
+            Method method = this.getClass().getMethod("removeJavascriptInterface", new Class[] { String.class });
             method.invoke(this, "searchBoxJavaBridge_");
         } catch (Exception e) {
             Log.d(TAG, "This API level do not support `removeJavascriptInterface`");
@@ -105,7 +105,7 @@ public class Cocos2dxWebView extends WebView {
     class Cocos2dxWebViewClient extends WebViewClient {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, final String urlString) {
-            Cocos2dxActivity activity = (Cocos2dxActivity)getContext();
+            Cocos2dxActivity activity = (Cocos2dxActivity) getContext();
 
             try {
                 URI uri = URI.create(urlString);
@@ -141,7 +141,7 @@ public class Cocos2dxWebView extends WebView {
         @Override
         public void onPageFinished(WebView view, final String url) {
             super.onPageFinished(view, url);
-            Cocos2dxActivity activity = (Cocos2dxActivity)getContext();
+            Cocos2dxActivity activity = (Cocos2dxActivity) getContext();
             activity.runOnGLThread(new Runnable() {
                 @Override
                 public void run() {
@@ -153,7 +153,7 @@ public class Cocos2dxWebView extends WebView {
         @Override
         public void onReceivedError(WebView view, int errorCode, String description, final String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
-            Cocos2dxActivity activity = (Cocos2dxActivity)getContext();
+            Cocos2dxActivity activity = (Cocos2dxActivity) getContext();
             activity.runOnGLThread(new Runnable() {
                 @Override
                 public void run() {
@@ -164,8 +164,8 @@ public class Cocos2dxWebView extends WebView {
     }
 
     public void setWebViewRect(int left, int top, int maxWidth, int maxHeight) {
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
         layoutParams.leftMargin = left;
         layoutParams.topMargin = top;
         layoutParams.width = maxWidth;

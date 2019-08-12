@@ -72,6 +72,9 @@ namespace cocos2d {
 
         void setScalesPageToFit(const bool scalesPageToFit);
 
+        const std::string & getUserAgent();
+        void setUserAgent(const std::string &ua);
+
         virtual void setVisible(bool visible);
 
         virtual void setFrame(float x, float y, float width, float height);
