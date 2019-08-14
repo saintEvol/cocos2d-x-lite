@@ -315,6 +315,7 @@ extern "C"
     JNIEXPORT void JNICALL JNI_RENDER(nativeOnSurfaceChanged)(JNIEnv*  env, jobject thiz, jint w, jint h)
     {
         //REFINE
+        cocos2d::EventDispatcher::dispatchResizeEvent(w,h);
     }
 
     /***********************************************************
