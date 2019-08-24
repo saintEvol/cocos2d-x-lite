@@ -210,14 +210,6 @@ public class CanvasRenderingContext2DImpl {
             mBitmap.recycle();
         }
         mBitmap = Bitmap.createBitmap((int)Math.ceil(w), (int)Math.ceil(h), Bitmap.Config.ARGB_8888);
-        // FIXME: in MIX 2S, its API level is 28, but can not find invokeInstanceMethod. It seems
-        // devices may not obey the specification, so comment the codes.
-//        if (Build.VERSION.SDK_INT >= 19) {
-//            Cocos2dxReflectionHelper.<Void>invokeInstanceMethod(mBitmap,
-//                                                    "setPremultiplied",
-//                                                                new Class[]{Boolean.class},
-//                                                                new Object[]{Boolean.FALSE});
-//        }
         mCanvas.setBitmap(mBitmap);
     }
 
@@ -378,7 +370,9 @@ public class CanvasRenderingContext2DImpl {
         mTextPaint.setStyle(Paint.Style.FILL);
         scaleX(mTextPaint, text, maxWidth);
         Point pt = convertDrawPoint(new Point(x, y), text);
-        mCanvas.drawText(text, pt.x, pt.y, mTextPaint);
+        // Convert to baseline Y
+        float baselineY = pt.y - mTextPaint.getFontMetrics().descent;
+        mCanvas.drawText(text, pt.x, baselineY, mTextPaint);
     }
 
     private void strokeText(String text, float x, float y, float maxWidth) {
@@ -389,7 +383,9 @@ public class CanvasRenderingContext2DImpl {
         mTextPaint.setStrokeWidth(mLineWidth);
         scaleX(mTextPaint, text, maxWidth);
         Point pt = convertDrawPoint(new Point(x, y), text);
-        mCanvas.drawText(text, pt.x, pt.y, mTextPaint);
+        // Convert to baseline Y
+        float baselineY = pt.y - mTextPaint.getFontMetrics().descent;
+        mCanvas.drawText(text, pt.x, baselineY, mTextPaint);
     }
 
     private float measureText(String text) {
@@ -495,12 +491,10 @@ public class CanvasRenderingContext2DImpl {
     private byte[] getDataRef() {
 //        Log.d(TAG, "this: " + this + ", getDataRef ...");
         if (mBitmap != null) {
-            final int len = mBitmap.getWidth() * mBitmap.getHeight() * 4;
-            final byte[] pixels = new byte[len];
+            final byte[] pixels = new byte[mBitmap.getWidth() * mBitmap.getHeight() * 4];
             final ByteBuffer buf = ByteBuffer.wrap(pixels);
             buf.order(ByteOrder.nativeOrder());
             mBitmap.copyPixelsToBuffer(buf);
-
             return pixels;
         }
 
