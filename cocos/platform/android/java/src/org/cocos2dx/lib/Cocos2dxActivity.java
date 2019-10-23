@@ -74,6 +74,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     private Cocos2dxWebViewHelper mWebViewHelper = null;
     private boolean hasFocus = false;
     private Cocos2dxEditBox mEditBox = null;
+    private boolean gainAudioFocus = false;
+    private boolean paused = true;
 
     // DEBUG VIEW BEGIN
     private LinearLayout mLinearLayoutForDebugView;
@@ -277,6 +279,18 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
         });
     }
 
+    public void setEnableAudioFocusGain(boolean value) {
+        if(gainAudioFocus != value) {
+            if(!paused) {
+                if (value)
+                    Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
+                else
+                    Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
+            }
+            gainAudioFocus = value;
+        }
+    }
+    
     public Cocos2dxGLSurfaceView onCreateView() {
         Cocos2dxGLSurfaceView glSurfaceView = new Cocos2dxGLSurfaceView(this);
         //this line is need on some device if we specify an alpha bits
@@ -340,8 +354,10 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     @Override
     protected void onResume() {
     	Log.d(TAG, "onResume()");
+        paused = false;
         super.onResume();
-        Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
+        if(gainAudioFocus)
+            Cocos2dxAudioFocusManager.registerAudioFocusListener(this);
         Utils.hideVirtualButton();
         Cocos2dxWebViewHelper.onResumeWebView();
        	resumeIfHasFocus();
@@ -357,7 +373,7 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     }
 
     private void resumeIfHasFocus() {
-        if(hasFocus) {
+        if(hasFocus && !paused) {
             Utils.hideVirtualButton();
             Cocos2dxHelper.onResume();
             mGLSurfaceView.onResume();
@@ -367,8 +383,10 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
     @Override
     protected void onPause() {
         Log.d(TAG, "onPause()");
+        paused = true;
         super.onPause();
-        Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
+        if(gainAudioFocus)
+            Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
         Cocos2dxHelper.onPause();
         Cocos2dxWebViewHelper.onPauseWebView();
         mGLSurfaceView.onPause();
@@ -376,7 +394,8 @@ public abstract class Cocos2dxActivity extends Activity implements Cocos2dxHelpe
 
     @Override
     protected void onDestroy() {
-        Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
+        if(gainAudioFocus)
+            Cocos2dxAudioFocusManager.unregisterAudioFocusListener(this);
         Cocos2dxHelper.unregisterBatteryLevelReceiver(this);;
         CanvasRenderingContext2DImpl.destroy();
 
