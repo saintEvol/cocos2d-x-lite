@@ -74,7 +74,7 @@ NS_CC_BEGIN
         return _impl->getUserAgent();
     }
 
-    void WebView::setUserAgent(const std::string& agentStr){
+    void WebView::setUserAgent(const std::string agentStr){
         _impl -> setUserAgent(agentStr);
     }
 

@@ -64,7 +64,7 @@ NS_CC_BEGIN
 
         std::string getUserAgent();
 
-        void setUserAgent(const std::string& agetnStr);
+        void setUserAgent(const std::string agetnStr);
 
         /**
          * Sets the main page contents, MIME type, content encoding, and base URL.
