@@ -1,19 +1,19 @@
 /****************************************************************************
  Copyright (c) 2014-2016 Chukong Technologies Inc.
  Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
-
+ 
  http://www.cocos2d-x.org
-
+ 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
+ 
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,6 @@
 #import <WebKit/WKWebView.h>
 #import <WebKit/WKUIDelegate.h>
 #import <WebKit/WKNavigationDelegate.h>
-
 #include "WebView-inl.h"
 #include "platform/CCApplication.h"
 #include "platform/ios/CCEAGLView-ios.h"
@@ -42,6 +41,9 @@
 @property (nonatomic) std::function<void(std::string url)> didFinishLoading;
 @property (nonatomic) std::function<void(std::string url)> didFailLoading;
 @property (nonatomic) std::function<void(std::string url)> onJsCallback;
+
+
+@property (nonatomic) std::string latestUserAgent;
 
 @property(nonatomic, readonly, getter=canGoBack) BOOL canGoBack;
 @property(nonatomic, readonly, getter=canGoForward) BOOL canGoForward;
@@ -84,7 +86,7 @@
 @end
 
 @implementation UIWebViewWrapper {
-
+    
 }
 
 + (instancetype)webViewWrapper {
@@ -94,6 +96,7 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
+        self.latestUserAgent = "";
         self.uiWebView = nil;
         self.shouldStartLoading = nullptr;
         self.didFinishLoading = nullptr;
@@ -116,6 +119,8 @@
         self.uiWebView.UIDelegate = self;
         self.uiWebView.navigationDelegate = self;
     }
+    
+  
     if (!self.uiWebView.superview) {
         auto eaglview = (CCEAGLView*)cocos2d::Application::getInstance()->getView();
         [eaglview addSubview:self.uiWebView];
@@ -142,11 +147,36 @@
     self.jsScheme = @(scheme.c_str());
 }
 
+- (const std::string )getUserAgent {
+    //不再是uiewbview获取的方式所以没有这个同步返回
+    //    if (!self.uiWebView) {[self setupWebView];}
+    
+    if(self.latestUserAgent==""){
+        UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectZero];
+        NSString* nsfaceName = [webView stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
+        std::string strFaceName =std::string([nsfaceName UTF8String]) ;
+        self.latestUserAgent =strFaceName;
+    }
+    return self.latestUserAgent;
+//    UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectZero];
+//    NSString* nsfaceName = [webView stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
+//    const std::string strFaceName =std::string([nsfaceName UTF8String]) ;
+    
+//    return strFaceName;
+}
+
+-(void)setUserAgent:(const std::string )ua{
+    
+    self.latestUserAgent = ua;
+    
+    NSString *newAgent =  [NSString stringWithCString:self.latestUserAgent.c_str() encoding:[NSString defaultCStringEncoding]];
+    [self.uiWebView setCustomUserAgent:newAgent];    
+}
 - (void)loadData:(const std::string &)data MIMEType:(const std::string &)MIMEType textEncodingName:(const std::string &)encodingName baseURL:(const std::string &)baseURL {
     auto path = [[NSBundle mainBundle] resourcePath];
     path = [path stringByAppendingPathComponent:@(baseURL.c_str() )];
     auto url = [NSURL fileURLWithPath:path];
-
+    
     [self.uiWebView loadData:[NSData dataWithBytes:data.c_str() length:data.length()]
                     MIMEType:@(MIMEType.c_str())
        characterEncodingName:@(encodingName.c_str())
@@ -212,9 +242,11 @@
 
 #pragma mark - WKNavigationDelegate
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    
     NSString *url = [webView.URL absoluteString];
-    if ([[webView.URL scheme] isEqualToString:self.jsScheme]) {
-        self.onJsCallback([url UTF8String]);
+    NSString *u =  [[navigationAction request].URL absoluteString]  ;
+    if ( [[navigationAction request].URL.scheme isEqualToString:self.jsScheme]) {
+        self.onJsCallback([u UTF8String]);
         decisionHandler(WKNavigationActionPolicyCancel);
         return;
     }
@@ -223,12 +255,12 @@
             decisionHandler(WKNavigationActionPolicyAllow);
         else
             decisionHandler(WKNavigationActionPolicyCancel);
-
+        
         return;
     }
-
     decisionHandler(WKNavigationActionPolicyAllow);
 }
+
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
     if (self.didFinishLoading) {
@@ -259,7 +291,7 @@
                                                       handler:^(UIAlertAction *action) {
                                                           completionHandler();
                                                       }]];
-
+    
     auto rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
     [rootViewController presentViewController:alertController animated:YES completion:^{}];
 }
@@ -269,12 +301,12 @@
 
 
 namespace cocos2d {
-
+    
     WebViewImpl::WebViewImpl(WebView *webView)
     : _uiWebViewWrapper([UIWebViewWrapper webViewWrapper]),
     _webView(webView) {
         [_uiWebViewWrapper retain];
-
+        
         _uiWebViewWrapper.shouldStartLoading = [this](std::string url) {
             if (this->_webView->_onShouldStartLoading) {
                 return this->_webView->_onShouldStartLoading(this->_webView, url);
@@ -297,78 +329,85 @@ namespace cocos2d {
             }
         };
     }
-
+    
     WebViewImpl::~WebViewImpl(){
         [_uiWebViewWrapper release];
         _uiWebViewWrapper = nullptr;
     }
-
+    
     void WebViewImpl::setJavascriptInterfaceScheme(const std::string &scheme) {
         [_uiWebViewWrapper setJavascriptInterfaceScheme:scheme];
     }
-
+    
     void WebViewImpl::loadData(const Data &data,
                                const std::string &MIMEType,
                                const std::string &encoding,
                                const std::string &baseURL) {
-
+        
         std::string dataString(reinterpret_cast<char *>(data.getBytes()), static_cast<unsigned int>(data.getSize()));
         [_uiWebViewWrapper loadData:dataString MIMEType:MIMEType textEncodingName:encoding baseURL:baseURL];
     }
-
+    
     void WebViewImpl::loadHTMLString(const std::string &string, const std::string &baseURL) {
         [_uiWebViewWrapper loadHTMLString:string baseURL:baseURL];
     }
-
+    
     void WebViewImpl::loadURL(const std::string &url) {
         [_uiWebViewWrapper loadUrl:url];
     }
-
+    
     void WebViewImpl::loadFile(const std::string &fileName) {
         auto fullPath = cocos2d::FileUtils::getInstance()->fullPathForFilename(fileName);
         [_uiWebViewWrapper loadFile:fullPath];
     }
-
+    
     void WebViewImpl::stopLoading() {
         [_uiWebViewWrapper stopLoading];
     }
-
+    
     void WebViewImpl::reload() {
         [_uiWebViewWrapper reload];
     }
-
+    
     bool WebViewImpl::canGoBack() {
         return _uiWebViewWrapper.canGoBack;
     }
-
+    
     bool WebViewImpl::canGoForward() {
         return _uiWebViewWrapper.canGoForward;
     }
-
+    
     void WebViewImpl::goBack() {
         [_uiWebViewWrapper goBack];
     }
-
+    
     void WebViewImpl::goForward() {
         [_uiWebViewWrapper goForward];
     }
-
+    
     void WebViewImpl::evaluateJS(const std::string &js) {
         [_uiWebViewWrapper evaluateJS:js];
     }
-
+    
     void WebViewImpl::setBounces(bool bounces) {
         [_uiWebViewWrapper setBounces:bounces];
     }
-
+    
     void WebViewImpl::setScalesPageToFit(const bool scalesPageToFit) {
         [_uiWebViewWrapper setScalesPageToFit:scalesPageToFit];
     }
-
+    
     void WebViewImpl::setVisible(bool visible){
         [_uiWebViewWrapper setVisible:visible];
     }
-
+    
+    void WebViewImpl::setUserAgent(const std::string ua){
+        [_uiWebViewWrapper setUserAgent:ua];
+    }
+    const std::string WebViewImpl::getUserAgent(){
+        return  [_uiWebViewWrapper getUserAgent];
+    };
+    
     void WebViewImpl::setFrame(float x, float y, float width, float height){
         auto eaglview = (CCEAGLView*)cocos2d::Application::getInstance()->getView();
         auto scaleFactor = [eaglview contentScaleFactor];
