@@ -120,7 +120,10 @@
         self.uiWebView.navigationDelegate = self;
     }
     
-  
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 11) {
+        self.uiWebView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+    }
+
     if (!self.uiWebView.superview) {
         auto eaglview = (CCEAGLView*)cocos2d::Application::getInstance()->getView();
         [eaglview addSubview:self.uiWebView];
